@@ -2,7 +2,9 @@
 Tests for doorman_agent.config module
 """
 
+import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -10,10 +12,10 @@ from doorman_agent.config import load_config
 from doorman_agent.models import AlertThresholds, Config
 
 
-# Fixture to clean environment variables before each test
+# Fixture to clean environment variables and ~/.doorman/config before each test
 @pytest.fixture(autouse=True)
-def clean_env(monkeypatch):
-    """Remove all doorman-related env vars before each test"""
+def clean_env(monkeypatch, tmp_path):
+    """Remove all doorman-related env vars and isolate ~/.doorman/config before each test"""
     env_vars = [
         "DOORMAN_API_KEY",
         "DOORMAN_API_URL",
@@ -24,6 +26,10 @@ def clean_env(monkeypatch):
     ]
     for var in env_vars:
         monkeypatch.delenv(var, raising=False)
+
+    # Point DOORMAN_CONFIG_PATH to a non-existent temp path so real ~/.doorman/config
+    # doesn't bleed into tests that expect default values
+    monkeypatch.setattr("doorman_agent.login.DOORMAN_CONFIG_PATH", tmp_path / "config")
 
 
 class TestLoadConfigDefaults:
@@ -228,3 +234,45 @@ class TestConfigValidation:
         monkeypatch.setenv("CHECK_INTERVAL", "not-a-number")
         with pytest.raises(ValueError):
             load_config()
+
+
+class TestDoormanConfigFile:
+    """Tests for ~/.doorman/config integration"""
+
+    def test_api_key_loaded_from_doorman_config(self, tmp_path):
+        config_file = tmp_path / "config"
+        config_file.write_text("api_key: sk_testkey123\napi_url: http://localhost:9000\n")
+
+        with patch("doorman_agent.login.DOORMAN_CONFIG_PATH", config_file):
+            config = load_config()
+
+        assert config.api_key == "sk_testkey123"
+        assert config.api_url == "http://localhost:9000"
+
+    def test_env_var_overrides_doorman_config(self, tmp_path, monkeypatch):
+        config_file = tmp_path / "config"
+        config_file.write_text("api_key: sk_from_file\n")
+        monkeypatch.setenv("DOORMAN_API_KEY", "sk_from_env")
+
+        with patch("doorman_agent.login.DOORMAN_CONFIG_PATH", config_file):
+            config = load_config()
+
+        assert config.api_key == "sk_from_env"
+
+    def test_missing_doorman_config_returns_empty(self, tmp_path):
+        missing = tmp_path / "does_not_exist"
+        with patch("doorman_agent.login.DOORMAN_CONFIG_PATH", missing):
+            config = load_config()
+        assert config.api_key is None
+
+    def test_save_and_load_roundtrip(self, tmp_path):
+        from doorman_agent.login import load_doorman_config, save_doorman_config
+
+        config_file = tmp_path / "config"
+        with patch("doorman_agent.login.DOORMAN_CONFIG_PATH", config_file):
+            save_doorman_config("sk_abc123", "http://example.com")
+            loaded = load_doorman_config()
+
+        assert loaded["api_key"] == "sk_abc123"
+        assert loaded["api_url"] == "http://example.com"
+        assert oct(config_file.stat().st_mode)[-3:] == "600"

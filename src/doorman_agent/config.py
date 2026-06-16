@@ -74,7 +74,15 @@ def load_config(config_path: str | None = None) -> Config:
                     privacy_data["sanitize_task_signatures"] = p["sanitize_task_signatures"]
                 config_data["privacy"] = PrivacyConfig(**privacy_data)
 
-    # Environment variables override file
+    # ~/.doorman/config (written by doorman login) overrides config.yaml
+    from doorman_agent.login import load_doorman_config
+    doorman_cfg = load_doorman_config()
+    if doorman_cfg.get("api_key") and not config_data.get("api_key"):
+        config_data["api_key"] = doorman_cfg["api_key"]
+    if doorman_cfg.get("api_url") and not config_data.get("api_url"):
+        config_data["api_url"] = doorman_cfg["api_url"]
+
+    # Environment variables override everything
     if os.environ.get("DOORMAN_API_KEY"):
         config_data["api_key"] = os.environ["DOORMAN_API_KEY"]
     if os.environ.get("DOORMAN_API_URL"):

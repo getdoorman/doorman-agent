@@ -45,6 +45,38 @@ def cmd_watch(args: argparse.Namespace) -> None:
     )
 
 
+def cmd_login(args: argparse.Namespace) -> None:
+    from doorman_agent.login import load_doorman_config, run_login
+
+    # Use --api-url flag, then ~/.doorman/config, then default
+    api_url = getattr(args, "api_url", None)
+    if not api_url:
+        api_url = load_doorman_config().get("api_url", "https://api.doorman.com")
+    run_login(api_url)
+
+
+def cmd_alerts_configure(args: argparse.Namespace) -> None:
+    from doorman_agent.config import load_config
+    from doorman_agent.login import load_doorman_config, run_alerts_configure
+
+    # Resolve API key: flag > env var > ~/.doorman/config > config.yaml
+    config = load_config(getattr(args, "config", None))
+    api_key = config.api_key
+    if not api_key:
+        print("❌ No API key found. Run doorman login first.")
+        sys.exit(1)
+
+    doorman_cfg = load_doorman_config()
+    api_url = getattr(args, "api_url", None) or doorman_cfg.get("api_url", "https://api.doorman.com")
+
+    run_alerts_configure(
+        api_url=api_url,
+        api_key=api_key,
+        slack_webhook=getattr(args, "slack_webhook", None),
+        alert_email=getattr(args, "email", None),
+    )
+
+
 def cmd_agent(args: argparse.Namespace) -> None:
     from doorman_agent.agent import DoormanAgent
     from doorman_agent.config import load_config
@@ -76,6 +108,23 @@ def main() -> None:
 
     subparsers = parser.add_subparsers(dest="command", metavar="COMMAND")
     subparsers.required = False  # allow --version without subcommand
+
+    # ── login ──────────────────────────────────────────────────────────────────
+    login_p = subparsers.add_parser("login", help="Authenticate and save API key to ~/.doorman/config")
+    login_p.add_argument("--api-url", default=None, help="Backend URL (default: https://api.doorman.com)")
+    login_p.set_defaults(func=cmd_login)
+
+    # ── alerts ─────────────────────────────────────────────────────────────────
+    alerts_p = subparsers.add_parser("alerts", help="Configure alert channels")
+    alerts_sub = alerts_p.add_subparsers(dest="alerts_command", metavar="SUBCOMMAND")
+    alerts_sub.required = True
+
+    alerts_cfg_p = alerts_sub.add_parser("configure", help="Set Slack webhook and/or alert email")
+    alerts_cfg_p.add_argument("--config", "-c", help="Path to YAML config file")
+    alerts_cfg_p.add_argument("--api-url", default=None, help="Backend URL override")
+    alerts_cfg_p.add_argument("--slack-webhook", metavar="URL", help="Slack Incoming Webhook URL")
+    alerts_cfg_p.add_argument("--email", metavar="EMAIL", help="Email address for alert notifications")
+    alerts_cfg_p.set_defaults(func=cmd_alerts_configure)
 
     # ── audit ──────────────────────────────────────────────────────────────────
     audit_p = subparsers.add_parser("audit", help="One-shot health check with TUI report")
