@@ -49,9 +49,11 @@
     {
       "group": "Commands",
       "pages": [
+        "docs/commands/login",
         "docs/commands/audit",
         "docs/commands/watch",
-        "docs/commands/agent"
+        "docs/commands/agent",
+        "docs/commands/alerts"
       ]
     },
     {

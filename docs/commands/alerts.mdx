@@ -1,0 +1,93 @@
+---
+title: doorman alerts
+description: Configure Slack and email alert channels
+---
+
+## Overview
+
+`doorman alerts configure` saves your alert channel settings to the Doorman backend. Once configured, you'll receive Slack messages and/or emails when your Celery infrastructure has HIGH or CRITICAL findings.
+
+Requires `doorman login` first.
+
+---
+
+## Configure alerts
+
+### Slack
+
+```bash
+doorman alerts configure --slack-webhook https://hooks.slack.com/services/...
+```
+
+To get a Slack webhook URL: go to your Slack workspace → Apps → Incoming Webhooks → Add New Webhook.
+
+### Email
+
+```bash
+doorman alerts configure --email alerts@company.com
+```
+
+### Both at once
+
+```bash
+doorman alerts configure \
+  --slack-webhook https://hooks.slack.com/services/... \
+  --email alerts@company.com
+```
+
+---
+
+## What triggers an alert
+
+Alerts fire when the agent detects a **HIGH** or **CRITICAL** finding:
+
+| Finding | Severity | Triggers alert |
+|---------|----------|----------------|
+| `REDIS_DOWN` | CRITICAL | ✅ Always |
+| `NO_WORKERS` | CRITICAL | ✅ Always |
+| `WORKER_OFFLINE` | CRITICAL | ✅ Always |
+| `STUCK_TASK` | HIGH | ✅ Always |
+| `QUEUE_BACKLOG_*` | HIGH | ✅ Always |
+| `QUEUE_SLA_BREACH_*` | HIGH | ✅ Always |
+| `HIGH_SATURATION` | MEDIUM | ❌ Not alerted |
+| `LATENCY_UNAVAILABLE` | MEDIUM | ❌ Not alerted |
+
+---
+
+## Alert format
+
+### Slack
+
+```
+🚨 [CRITICAL] WORKER_OFFLINE
+Worker offline: beat-wrk
+
+• worker: beat-wrk
+• id_hash: w-a1b2c3d4
+
+doorman · acme-corp · 2026-06-15 14:22 UTC
+```
+
+### Email
+
+Same content as Slack, formatted as HTML.
+
+---
+
+## Cooldown
+
+To avoid alert spam, Doorman enforces a **30-minute cooldown** per finding per organization.
+
+- `CRITICAL` findings **always** alert, regardless of cooldown
+- `HIGH` findings alert once every 30 minutes
+
+---
+
+## Flags
+
+| Flag | Description |
+|------|-------------|
+| `--slack-webhook URL` | Slack Incoming Webhook URL (must start with `https://`) |
+| `--email EMAIL` | Email address for alert notifications |
+| `--config`, `-c` | Path to YAML config file (for API key resolution) |
+| `--api-url` | Backend URL override |

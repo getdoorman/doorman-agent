@@ -1,6 +1,6 @@
 ---
 title: Quickstart
-description: Run your first Celery health check in under 2 minutes
+description: From install to your first health check in under 2 minutes
 ---
 
 ## Prerequisites
@@ -21,14 +21,12 @@ pip install doorman-agent
 
 ## 2. Point to your infrastructure
 
-Doorman reads connection URLs from environment variables. No config file needed to get started.
-
 ```bash
 export REDIS_URL=redis://your-redis:6379/0
 export CELERY_BROKER_URL=redis://your-redis:6379/0
 ```
 
-If your Redis is on localhost with default settings, skip this step — those are the defaults.
+If Redis is on localhost with default settings, skip this — those are already the defaults.
 
 ---
 
@@ -37,8 +35,6 @@ If your Redis is on localhost with default settings, skip this step — those ar
 ```bash
 doorman audit
 ```
-
-You'll see a report like this:
 
 ```
 🔍 Doorman Audit
@@ -72,39 +68,50 @@ Metrics
 Audit completed in 1.2s
 ```
 
+That's it for local monitoring. No config file, no account, no external service.
+
 ---
 
-## 4. Enable latency tracking (recommended)
+## 4. Connect to Doorman for alerts (optional)
 
-By default, Celery + Redis doesn't timestamp queued tasks, so Doorman can't measure how long tasks wait. You'll see `latency: unknown` until you add one line to your Celery app:
+To get Slack and email alerts when something breaks, connect the agent to your Doorman account:
 
-```python
-from celery import Celery
-from doorman_agent.stamps import DoormanStampPlugin
-
-app = Celery(...)
-DoormanStampPlugin.install(app)  # add this line
+```bash
+doorman login
 ```
 
-After this, Doorman shows real wait times and can alert you when tasks breach your SLA.
+Enter your email, click the magic link, and your API key is saved automatically.
 
-See [Latency Tracking](/guides/latency-tracking) for the full guide.
+Then configure where to send alerts:
+
+```bash
+doorman alerts configure --slack-webhook https://hooks.slack.com/...
+doorman alerts configure --email you@company.com
+```
+
+Then run the continuous monitoring agent:
+
+```bash
+doorman agent
+```
+
+The agent runs in the background, collects metrics every 15 seconds, and sends you alerts the moment something goes wrong.
 
 ---
 
 ## Next steps
 
 <CardGroup cols={2}>
-  <Card title="Run a deep audit" icon="microscope" href="/guides/deep-audit">
-    Check your Redis and Celery configuration for common production misconfigurations.
+  <Card title="Enable latency tracking" icon="clock" href="/guides/latency-tracking">
+    Add one line to your Celery app to measure real queue wait times.
   </Card>
-  <Card title="Integrate with CI/CD" icon="code-branch" href="/guides/cicd">
+  <Card title="Run a deep audit" icon="microscope" href="/guides/deep-audit">
+    Check your Redis and Celery configuration for common misconfigurations.
+  </Card>
+  <Card title="CI/CD integration" icon="code-branch" href="/guides/cicd">
     Use exit codes to fail your pipeline when Celery issues are detected.
   </Card>
-  <Card title="Understand findings" icon="triangle-exclamation" href="/reference/findings">
-    Learn what each finding means, why it happens, and how to fix it.
-  </Card>
-  <Card title="Configuration reference" icon="gear" href="/reference/configuration">
-    Full reference for config file and environment variables.
+  <Card title="Findings reference" icon="triangle-exclamation" href="/reference/findings">
+    Learn what each finding means and how to fix it.
   </Card>
 </CardGroup>

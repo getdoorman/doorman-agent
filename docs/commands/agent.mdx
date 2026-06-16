@@ -1,18 +1,18 @@
 ---
 title: doorman agent
-description: Continuous monitoring daemon with local logging or cloud metrics
+description: Continuous monitoring daemon with local logging or cloud alerts
 ---
 
 ## Overview
 
-`doorman agent` runs a continuous monitoring loop. On each cycle it collects metrics and either logs them locally (local mode) or sends them to doorman.com (API mode).
+`doorman agent` runs a continuous monitoring loop. On each cycle it collects metrics and either logs them locally (local mode) or sends them to the Doorman backend for persistent monitoring and alerts (API mode).
 
 ```bash
 # Local mode — log metrics as structured JSON, no external calls
 doorman agent --local
 
-# API mode — send metrics to doorman.com for dashboards and alerts
-doorman agent --token your-api-key
+# API mode — after running doorman login, no flags needed
+doorman agent
 ```
 
 Stop with `Ctrl+C` or `SIGTERM`. The agent handles both gracefully.
@@ -26,14 +26,27 @@ Stop with `Ctrl+C` or `SIGTERM`. The agent handles both gracefully.
 | `--config`, `-c` | — | Path to a YAML config file |
 | `--interval` | `15` | Seconds between collection cycles |
 | `--local`, `-l` | off | Log metrics locally, skip all API calls |
-| `--token` | — | API key for doorman.com (or set `DOORMAN_API_KEY`) |
+| `--token` | — | API key override (usually not needed after `doorman login`) |
 | `--no-color` | off | Disable ANSI colors in log output |
+
+---
+
+## API key resolution
+
+The agent finds your API key automatically in this order:
+
+1. `--token` flag
+2. `DOORMAN_API_KEY` environment variable
+3. `~/.doorman/config` — saved by `doorman login` ← **recommended**
+4. `api_key` in your `config.yaml`
+
+After running `doorman login`, you never need to set an API key manually.
 
 ---
 
 ## Local mode
 
-Local mode is the best way to verify what the agent collects before sending anything to an external service.
+The best way to verify what the agent collects before connecting it to the backend.
 
 ```bash
 doorman agent --local
@@ -43,7 +56,7 @@ Each cycle emits structured JSON to stdout:
 
 ```json
 {
-  "timestamp": "2026-05-31T14:22:01Z",
+  "timestamp": "2026-06-15T14:22:01Z",
   "total_pending": 47,
   "total_active": 6,
   "saturation_pct": 37.5,
@@ -54,8 +67,7 @@ Each cycle emits structured JSON to stdout:
     {"name": "emails", "depth": 35, "oldest_task_age_seconds": 88.1}
   ],
   "workers": [
-    {"name": "api-worker", "active_tasks": 3, "concurrency": 8, "is_alive": true},
-    {"name": "email-wrk", "active_tasks": 3, "concurrency": 8, "is_alive": true}
+    {"name": "api-worker", "active_tasks": 3, "concurrency": 8, "is_alive": true}
   ]
 }
 ```
@@ -70,14 +82,17 @@ doorman agent --local | jq '.queues[] | select(.depth > 100)'
 
 ## API mode
 
-API mode sends metrics to doorman.com on every cycle. The backend stores history, evaluates findings, and sends alerts when thresholds are breached.
+API mode sends metrics to the Doorman backend on every cycle. The backend evaluates findings and sends Slack/email alerts when thresholds are breached.
 
 ```bash
-export DOORMAN_API_KEY=sk_your_key_here
-doorman agent --config config.yaml
+# After doorman login — API key is loaded from ~/.doorman/config automatically
+doorman agent
+
+# Or with an explicit token
+doorman agent --token sk_your_key_here
 ```
 
-On startup, the agent validates your API key before entering the monitoring loop. If the key is invalid, it exits immediately.
+On startup the agent validates the API key. If invalid, it exits immediately with a clear error.
 
 ---
 
@@ -117,6 +132,7 @@ CMD ["doorman", "agent", "--local"]
 ```bash
 docker run -e REDIS_URL=redis://your-redis:6379/0 \
            -e CELERY_BROKER_URL=redis://your-redis:6379/0 \
+           -e DOORMAN_API_KEY=sk_your_key \
            doorman-agent
 ```
 
@@ -126,10 +142,11 @@ docker run -e REDIS_URL=redis://your-redis:6379/0 \
 services:
   doorman:
     image: python:3.12-slim
-    command: sh -c "pip install doorman-agent && doorman agent --local"
+    command: sh -c "pip install doorman-agent && doorman agent"
     environment:
       REDIS_URL: redis://redis:6379/0
       CELERY_BROKER_URL: redis://redis:6379/0
+      DOORMAN_API_KEY: sk_your_key
     depends_on:
       - redis
     restart: unless-stopped
