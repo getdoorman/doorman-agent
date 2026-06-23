@@ -8,9 +8,9 @@ import json
 import time
 from unittest.mock import MagicMock
 
-from doorman_agent.audit import _status_to_exit_code
-from doorman_agent.collector import _redact_url
-from doorman_agent.findings import (
+from kanari_agent.audit import _status_to_exit_code
+from kanari_agent.collector import _redact_url
+from kanari_agent.findings import (
     Finding,
     FindingsEngine,
     Severity,
@@ -18,7 +18,7 @@ from doorman_agent.findings import (
     compute_system_status,
     top_findings,
 )
-from doorman_agent.models import Config, QueueMetrics, SystemMetrics, WorkerMetrics
+from kanari_agent.models import Config, QueueMetrics, SystemMetrics, WorkerMetrics
 
 
 def _metrics(**kwargs) -> SystemMetrics:
@@ -374,7 +374,7 @@ class TestUrlRedaction:
 
 class TestStampHeaders:
     def test_adds_doorman_ts_header(self):
-        from doorman_agent.stamps import DOORMAN_TS_HEADER, stamp_headers
+        from kanari_agent.stamps import DOORMAN_TS_HEADER, stamp_headers
 
         headers: dict = {"lang": "py"}
         result = stamp_headers(headers)
@@ -384,7 +384,7 @@ class TestStampHeaders:
         assert abs(result[DOORMAN_TS_HEADER] - time.time()) < 2
 
     def test_preserves_existing_headers(self):
-        from doorman_agent.stamps import stamp_headers
+        from kanari_agent.stamps import stamp_headers
 
         headers = {"lang": "py", "task": "my_task"}
         result = stamp_headers(headers)
@@ -396,7 +396,7 @@ class TestDoormanStampPluginInstall:
     def test_install_connects_before_task_publish(self):
         from celery.signals import before_task_publish
 
-        from doorman_agent.stamps import DoormanStampPlugin
+        from kanari_agent.stamps import DoormanStampPlugin
 
         app = MagicMock()
         receivers_before = len(before_task_publish.receivers)
@@ -406,7 +406,7 @@ class TestDoormanStampPluginInstall:
     def test_signal_handler_stamps_headers(self):
         from celery.signals import before_task_publish
 
-        from doorman_agent.stamps import DOORMAN_TS_HEADER, DoormanStampPlugin
+        from kanari_agent.stamps import DOORMAN_TS_HEADER, DoormanStampPlugin
 
         app = MagicMock()
         DoormanStampPlugin.install(app)
@@ -420,7 +420,7 @@ class TestDoormanStampPluginInstall:
         assert headers[DOORMAN_TS_HEADER] > 1_000_000_000  # epoch sanity
 
     def test_handler_preserved_from_gc(self):
-        from doorman_agent.stamps import DoormanStampPlugin
+        from kanari_agent.stamps import DoormanStampPlugin
 
         app = MagicMock()
         DoormanStampPlugin.install(app)
@@ -434,8 +434,8 @@ class TestDoormanStampPluginInstall:
 
 class TestAuditJsonOutput:
     def test_json_output_is_parseable_with_required_keys(self, capsys):
-        from doorman_agent.audit import _print_json_output
-        from doorman_agent.findings import Severity, SystemStatus
+        from kanari_agent.audit import _print_json_output
+        from kanari_agent.findings import Severity, SystemStatus
 
         metrics = _metrics(
             total_pending_tasks=10,
@@ -481,8 +481,8 @@ class TestAuditJsonOutput:
         assert m["celery_connected"] is True
 
     def test_json_output_empty_findings(self, capsys):
-        from doorman_agent.audit import _print_json_output
-        from doorman_agent.findings import SystemStatus
+        from kanari_agent.audit import _print_json_output
+        from kanari_agent.findings import SystemStatus
 
         metrics = _metrics()
         _print_json_output(metrics, [], SystemStatus.OK, 0)

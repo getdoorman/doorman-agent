@@ -2,7 +2,7 @@
 Doorman Stamps — optional latency tracking for Celery tasks.
 
 Usage in your Celery app:
-    from doorman_agent.stamps import DoormanStampPlugin
+    from kanari_agent.stamps import DoormanStampPlugin
 
     app = Celery(...)
     DoormanStampPlugin.install(app)

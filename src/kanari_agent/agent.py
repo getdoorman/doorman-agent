@@ -8,12 +8,12 @@ import signal
 import sys
 import time
 
-from doorman_agent.api_client import APIClient
-from doorman_agent.collector import MetricsCollector, _redact_url
-from doorman_agent.config import AGENT_VERSION
-from doorman_agent.findings import FindingsEngine
-from doorman_agent.logger import StructuredLogger
-from doorman_agent.models import Config, SystemMetrics
+from kanari_agent.api_client import APIClient
+from kanari_agent.collector import MetricsCollector, _redact_url
+from kanari_agent.config import AGENT_VERSION
+from kanari_agent.findings import FindingsEngine
+from kanari_agent.logger import StructuredLogger
+from kanari_agent.models import Config, SystemMetrics
 
 
 class DoormanAgent:

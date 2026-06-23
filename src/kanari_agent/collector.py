@@ -10,9 +10,9 @@ import time
 from datetime import datetime, timezone
 from typing import Any
 
-from doorman_agent.logger import StructuredLogger
-from doorman_agent.models import Config, QueueMetrics, SystemMetrics, WorkerMetrics
-from doorman_agent.stamps import DOORMAN_TS_HEADER
+from kanari_agent.logger import StructuredLogger
+from kanari_agent.models import Config, QueueMetrics, SystemMetrics, WorkerMetrics
+from kanari_agent.stamps import DOORMAN_TS_HEADER
 
 # Optional dependencies - check at runtime
 try:

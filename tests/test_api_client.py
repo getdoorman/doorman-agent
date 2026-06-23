@@ -12,8 +12,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from doorman_agent.api_client import APIClient
-from doorman_agent.models import Config, PrivacyConfig, QueueMetrics, SystemMetrics, WorkerMetrics
+from kanari_agent.api_client import APIClient
+from kanari_agent.models import Config, PrivacyConfig, QueueMetrics, SystemMetrics, WorkerMetrics
 
 
 @pytest.fixture

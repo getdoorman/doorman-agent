@@ -7,7 +7,7 @@ from __future__ import annotations
 import argparse
 import sys
 
-from doorman_agent.config import AGENT_VERSION
+from kanari_agent.config import AGENT_VERSION
 
 
 def _add_common_args(parser: argparse.ArgumentParser) -> None:
@@ -17,8 +17,8 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
 
 
 def cmd_audit(args: argparse.Namespace) -> None:
-    from doorman_agent.audit import run_audit
-    from doorman_agent.config import load_config
+    from kanari_agent.audit import run_audit
+    from kanari_agent.config import load_config
 
     config = load_config(args.config)
     exit_code = run_audit(
@@ -33,8 +33,8 @@ def cmd_audit(args: argparse.Namespace) -> None:
 
 
 def cmd_watch(args: argparse.Namespace) -> None:
-    from doorman_agent.audit import run_watch
-    from doorman_agent.config import load_config
+    from kanari_agent.audit import run_watch
+    from kanari_agent.config import load_config
 
     config = load_config(args.config)
     run_watch(
@@ -46,7 +46,7 @@ def cmd_watch(args: argparse.Namespace) -> None:
 
 
 def cmd_login(args: argparse.Namespace) -> None:
-    from doorman_agent.login import load_doorman_config, run_login
+    from kanari_agent.login import load_doorman_config, run_login
 
     # Use --api-url flag, then ~/.doorman/config, then default
     api_url = getattr(args, "api_url", None)
@@ -56,8 +56,8 @@ def cmd_login(args: argparse.Namespace) -> None:
 
 
 def cmd_alerts_configure(args: argparse.Namespace) -> None:
-    from doorman_agent.config import load_config
-    from doorman_agent.login import load_doorman_config, run_alerts_configure
+    from kanari_agent.config import load_config
+    from kanari_agent.login import load_doorman_config, run_alerts_configure
 
     # Resolve API key: flag > env var > ~/.doorman/config > config.yaml
     config = load_config(getattr(args, "config", None))
@@ -78,8 +78,8 @@ def cmd_alerts_configure(args: argparse.Namespace) -> None:
 
 
 def cmd_agent(args: argparse.Namespace) -> None:
-    from doorman_agent.agent import DoormanAgent
-    from doorman_agent.config import load_config
+    from kanari_agent.agent import DoormanAgent
+    from kanari_agent.config import load_config
 
     config = load_config(args.config)
     if args.local:

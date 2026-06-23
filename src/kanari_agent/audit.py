@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
-from doorman_agent.models import Config, SystemMetrics
+from kanari_agent.models import Config, SystemMetrics
 
 # Exit codes
 EXIT_HEALTHY = 0
@@ -55,7 +55,7 @@ class AuditResult:
 
 def _status_to_exit_code(status: Any) -> int:
     """Map SystemStatus to exit code."""
-    from doorman_agent.findings import SystemStatus
+    from kanari_agent.findings import SystemStatus
 
     mapping = {
         SystemStatus.OK: EXIT_HEALTHY,
@@ -96,9 +96,9 @@ def run_audit(
     from rich.console import Console
     from rich.progress import Progress, SpinnerColumn, TextColumn
 
-    from doorman_agent.collector import MetricsCollector
-    from doorman_agent.findings import FindingsEngine, compute_system_status
-    from doorman_agent.logger import StructuredLogger
+    from kanari_agent.collector import MetricsCollector
+    from kanari_agent.findings import FindingsEngine, compute_system_status
+    from kanari_agent.logger import StructuredLogger
 
     console = Console(no_color=no_color)
     logger = StructuredLogger("doorman-audit")
@@ -211,7 +211,7 @@ def _print_json_output(
     exit_code: int,
 ) -> None:
     """Print JSON summary to stdout."""
-    from doorman_agent.findings import top_findings
+    from kanari_agent.findings import top_findings
 
     top = top_findings(findings, 3)
     top_list = []

@@ -8,8 +8,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from doorman_agent.agent import DoormanAgent
-from doorman_agent.models import Config, QueueMetrics, SystemMetrics, WorkerMetrics
+from kanari_agent.agent import DoormanAgent
+from kanari_agent.models import Config, QueueMetrics, SystemMetrics, WorkerMetrics
 
 
 @pytest.fixture

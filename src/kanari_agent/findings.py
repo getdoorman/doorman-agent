@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from doorman_agent.models import Config, SystemMetrics
+from kanari_agent.models import Config, SystemMetrics
 
 
 class Severity(str, Enum):
@@ -275,7 +275,7 @@ class FindingsEngine:
                     ],
                     safe_fix=[
                         "Add DoormanStampPlugin to your Celery app (one line):\n"
-                        "  from doorman_agent.stamps import DoormanStampPlugin\n"
+                        "  from kanari_agent.stamps import DoormanStampPlugin\n"
                         "  DoormanStampPlugin.install(app)  # before any task is published",
                         "This uses the before_task_publish signal and adds 'doorman_sent_ts' to every message header.",
                         "Note: only NEW tasks published after install will have timestamps.",

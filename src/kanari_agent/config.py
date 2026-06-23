@@ -7,10 +7,10 @@ from __future__ import annotations
 import os
 from importlib.metadata import PackageNotFoundError, version
 
-from doorman_agent.models import AlertThresholds, Config, PrivacyConfig
+from kanari_agent.models import AlertThresholds, Config, PrivacyConfig
 
 try:
-    AGENT_VERSION = version("doorman-agent")
+    AGENT_VERSION = version("kanari-agent")
 except PackageNotFoundError:
     AGENT_VERSION = "0.1.0"  # fallback for dev installs
 
@@ -75,7 +75,7 @@ def load_config(config_path: str | None = None) -> Config:
                 config_data["privacy"] = PrivacyConfig(**privacy_data)
 
     # ~/.doorman/config (written by doorman login) overrides config.yaml
-    from doorman_agent.login import load_doorman_config
+    from kanari_agent.login import load_doorman_config
     doorman_cfg = load_doorman_config()
     if doorman_cfg.get("api_key") and not config_data.get("api_key"):
         config_data["api_key"] = doorman_cfg["api_key"]
