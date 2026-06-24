@@ -112,15 +112,27 @@ mypy src/kanari_agent
 
 ### Running the Agent
 ```bash
-# Run in local mode (no API calls, just logging)
-poetry run kanari-agent --config config.yaml --local
+# One-shot health check (no account needed)
+poetry run kanari audit --config config.yaml
 
-# Run once (for testing)
-poetry run kanari-agent --config config.yaml --once
+# Live dashboard (refreshes every 5s)
+poetry run kanari watch --config config.yaml
 
-# Run in API mode (production)
+# Authenticate and save API key to ~/.kanari/config
+poetry run kanari login
+
+# Configure Slack/email alerts
+poetry run kanari alerts configure --slack-webhook https://hooks.slack.com/...
+
+# Open billing checkout to subscribe
+poetry run kanari upgrade --plan solo
+
+# Run continuous monitoring daemon (API mode)
 export KANARI_API_KEY=your-api-key
-poetry run kanari-agent --config config.yaml
+poetry run kanari agent --config config.yaml
+
+# Run in local mode (no API calls, just structured logging)
+poetry run kanari agent --config config.yaml --local
 ```
 
 ## Architecture
@@ -186,7 +198,9 @@ KanariAgent.check_once()
 
 Configuration loads in this order (later overrides earlier):
 1. YAML file defaults
-2. Environment variables
+2. `~/.kanari/config` (written by `kanari login`)
+3. Environment variables (`KANARI_API_KEY`, `KANARI_API_URL`, etc.)
+4. Hardcoded defaults (fallback only)
 
 **Important**: If `monitored_queues` is not set in config, queues are auto-discovered from Celery workers using `control.inspect().active_queues()`.
 
