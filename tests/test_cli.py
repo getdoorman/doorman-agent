@@ -132,7 +132,6 @@ class TestCliAgent:
     def test_agent_local_mode_calls_run(self):
         cfg = Config(local_mode=True)
         mock_agent = MagicMock()
-        mock_agent.collector.connect.return_value = True
 
         with (
             patch("kanari_agent.config.load_config", return_value=cfg),
@@ -143,9 +142,10 @@ class TestCliAgent:
         mock_agent.run.assert_called_once()
 
     def test_agent_connect_failure_exits(self):
+        # Connection error handling lives in agent.run(); cmd_agent delegates entirely to run().
         cfg = Config(local_mode=True)
         mock_agent = MagicMock()
-        mock_agent.collector.connect.return_value = False
+        mock_agent.run.side_effect = SystemExit(1)
 
         with (
             patch("kanari_agent.config.load_config", return_value=cfg),
@@ -153,12 +153,13 @@ class TestCliAgent:
         ):
             with pytest.raises(SystemExit) as exc:
                 _run_main(["agent", "--local"])
+
+        mock_agent.run.assert_called_once()
         assert exc.value.code == 1
 
     def test_agent_with_token(self):
         cfg = Config()
         mock_agent = MagicMock()
-        mock_agent.collector.connect.return_value = True
 
         with (
             patch("kanari_agent.config.load_config", return_value=cfg),

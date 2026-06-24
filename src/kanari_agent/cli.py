@@ -90,9 +90,6 @@ def cmd_agent(args: argparse.Namespace) -> None:
         config.check_interval_seconds = args.interval
 
     agent = KanariAgent(config)
-    if not agent.collector.connect():
-        print("❌ Could not connect to Redis/Celery")
-        sys.exit(1)
     agent.run()
 
 

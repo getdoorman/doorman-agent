@@ -39,7 +39,7 @@ def load_config(config_path: str | None = None) -> Config:
             # Map YAML to config dict
             config_data = {
                 "api_key": yaml_config.get("api_key"),
-                "api_url": yaml_config.get("api_url", "https://api.getkanari.com"),
+                "api_url": yaml_config.get("api_url", ""),
                 "local_mode": yaml_config.get("local_mode", False),
                 "redis_url": yaml_config.get("redis_url", "redis://localhost:6379/0"),
                 "celery_broker_url": yaml_config.get(
@@ -87,6 +87,11 @@ def load_config(config_path: str | None = None) -> Config:
         config_data["api_key"] = os.environ["KANARI_API_KEY"]
     if os.environ.get("KANARI_API_URL"):
         config_data["api_url"] = os.environ["KANARI_API_URL"]
+
+    # Final fallback: hardcoded default if no source provided a value
+    if not config_data.get("api_url"):
+        config_data["api_url"] = "https://api.getkanari.com"
+
     if os.environ.get("REDIS_URL"):
         config_data["redis_url"] = os.environ["REDIS_URL"]
     if os.environ.get("CELERY_BROKER_URL"):
