@@ -21,7 +21,7 @@ cd kanari-agent
 poetry install --with dev
 
 # Activate virtual environment
-poetry shell
+eval $(poetry env activate)  # https://python-poetry.org/docs/managing-environments/#activating-the-environment
 
 # Install pre-commit hooks
 pre-commit install
