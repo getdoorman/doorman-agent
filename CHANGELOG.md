@@ -10,6 +10,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [0.2.0b1] — 2026-07-01
+
+### Added
+- **`kanari login`** — magic link authentication that saves your API key to `~/.kanari/config` automatically; no need to set environment variables manually
+- **`kanari alerts configure`** — configure Slack webhooks and email alerts from the CLI (`--slack-webhook`, `--email`)
+
+### Changed
+- **Package renamed from `doorman-agent` to `kanari-agent`** — install with `pip install kanari-agent`
+- **CLI commands renamed**: `doorman` → `kanari` (e.g. `kanari audit`, `kanari watch`, `kanari agent`)
+- **Environment variables renamed**: `DOORMAN_API_KEY` → `KANARI_API_KEY`, `DOORMAN_API_URL` → `KANARI_API_URL`, `DOORMAN_LOCAL_MODE` → `KANARI_LOCAL_MODE`
+- **Config file moved**: `~/.doorman/config` → `~/.kanari/config`
+
+### Fixed
+- ruff and mypy pre-commit hooks now run at matching versions, eliminating false lint failures
+
+---
+
 ## [0.1.0] — 2026-05-31
 
 ### Added
@@ -60,6 +77,7 @@ Initial beta release.
 
 ---
 
-[Unreleased]: https://github.com/herchila/kanari-agent/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/herchila/kanari-agent/compare/v0.1.0b1...v0.1.0
-[0.1.0b1]: https://github.com/herchila/kanari-agent/releases/tag/v0.1.0b1
+[Unreleased]: https://github.com/getkanari/kanari-agent/compare/v0.2.0b1...HEAD
+[0.2.0b1]: https://github.com/getkanari/kanari-agent/compare/v0.1.0...v0.2.0b1
+[0.1.0]: https://github.com/getkanari/kanari-agent/compare/v0.1.0b1...v0.1.0
+[0.1.0b1]: https://github.com/getkanari/kanari-agent/releases/tag/v0.1.0b1
