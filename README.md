@@ -12,7 +12,7 @@ pip install kanari-agent
 kanari audit
 ```
 
-No config file. No API key. No external service. Works against any Celery + Redis setup in seconds.
+No account needed. No external service. Point it at your Redis and get a full health report in seconds.
 
 ---
 
@@ -104,7 +104,7 @@ export CELERY_BROKER_URL=redis://your-redis:6379/0
 kanari audit
 ```
 
-That's it. No config file needed, no API key, no external dependencies.
+That's it. No account, no API key, no external dependencies beyond Redis and Celery.
 
 ---
 
